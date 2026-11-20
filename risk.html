@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Who bears the cost? · THE WATER BELOW</title>
+<meta name="description" content="A screening-level economic risk screen for Ulaanbaatar's groundwater: who bears the cost when the aquifer runs short. Work in progress, 2027.">
+<script>(function(){var d=document.documentElement,t;try{t=localStorage.getItem('twb-theme')}catch(e){}d.setAttribute('data-theme',t==='dark'?'dark':'light');d.classList.add('js')})();</script>
+<style>
+/* 1 · Tokens (same palette as the main site) */
+:root{
+  --bg:#f6f4ef; --surface:#fffdf9; --surface-2:#eeebe3; --ink:#1d2a30; --ink-2:#465359; --ink-3:#6a767b;
+  --line:#ddd8cc; --line-2:#c9c2b2; --accent:#1f6f8b; --accent-soft:#e3eef1; --water:#2a7898; --loss:#9a5a2b; --gain:#1f7a6a; --warn:#9a6a10;
+  --q0:#e4eef2; --q1:#bcd6e1; --q2:#86b6ca; --q3:#4f8eaa; --q4:#2a6683; --nodata:#ece8df;
+  --serif:"PT Serif","Noto Serif",Georgia,serif; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r:10px; --r-lg:16px; --shadow-soft:0 1px 2px rgba(29,42,48,.05),0 4px 14px rgba(29,42,48,.05);
+  --gutter:clamp(16px,4vw,40px); --max:1180px; --header:60px;
+}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#11181c; --surface:#172126; --surface-2:#1d292f; --ink:#e7eef0; --ink-2:#b4c1c6; --ink-3:#8b9ba1;
+  --line:#2a383f; --line-2:#3a4a52; --accent:#6bb8d5; --accent-soft:#1b3440; --water:#6bb8d5; --loss:#e0a272; --gain:#7fd0bd; --warn:#e6c069;
+  --q0:#1d3440; --q1:#22506a; --q2:#2d6e8f; --q3:#4c95b7; --q4:#8cc6de; --nodata:#1f2a30;
+  --shadow-soft:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);
+}
+/* 2 · Base */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:calc(var(--header) + 12px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans)}
+a{color:var(--accent);text-underline-offset:.18em}
+h1,h2,h3{margin:0;line-height:1.2}
+p{margin:0 0 .8em}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:var(--max);margin:0 auto;padding-inline:var(--gutter)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:8px 14px;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);cursor:pointer;font-weight:600;font-size:.875rem;text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .btn-primary{color:#0d1418}
+.tag{display:inline-block;font:700 .66rem/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;border-radius:6px;border:1px dashed var(--ink-3);color:var(--ink-2)}
+.tag.ok{border:1px solid var(--gain);color:var(--gain)} .tag.todo{border:1px solid var(--warn);color:var(--warn)} .tag.no{border:1px solid var(--loss);color:var(--loss)}
+.fine{font-size:.82rem;color:var(--ink-3);line-height:1.5}
+.cite{font-size:.8em;font-weight:600;white-space:nowrap}
+/* 3 · Header */
+.site-header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.site-header .wrap{display:flex;align-items:center;gap:var(--gutter);min-height:var(--header)}
+.brand{margin-right:auto;text-decoration:none;color:var(--ink);line-height:1.1}
+.brand b{display:block;font:700 1rem/1.1 var(--serif);letter-spacing:.04em}
+.brand span{font-size:.72rem;color:var(--ink-3)}
+.nav{display:flex;gap:18px;font-size:.9rem;font-weight:600}
+.nav a{color:var(--ink-2);text-decoration:none} .nav a:hover{color:var(--ink)}
+.icon-btn{width:40px;height:40px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;display:grid;place-items:center}
+/* 4 · Intro */
+.intro{padding:clamp(28px,6vw,64px) 0 clamp(20px,4vw,36px)}
+.eyebrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font:700 .74rem/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-bottom:16px}
+.intro h1{font:700 clamp(1.9rem,1.3rem + 2.4vw,3rem)/1.1 var(--serif);max-width:22ch;letter-spacing:-.01em}
+.intro .mn{display:block;font:400 clamp(1rem,.9rem + .5vw,1.25rem)/1.4 var(--serif);color:var(--ink-3);margin-top:10px}
+.answer{font-size:clamp(1.02rem,.95rem + .3vw,1.18rem);color:var(--ink-2);max-width:46rem;margin-top:20px}
+.status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:24px}
+.status div{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.status dt{font-size:.74rem;color:var(--ink-3)} .status dd{margin:2px 0 0;font-weight:700}
+/* 5 · Sections */
+.section{padding:clamp(32px,6vw,64px) 0;border-top:1px solid var(--line)}
+.section h2{font:700 clamp(1.5rem,1.2rem + 1.2vw,2.1rem)/1.15 var(--serif);max-width:28ch}
+.lede{color:var(--ink-2);max-width:46rem;margin-top:12px}
+.cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-soft);padding:20px}
+.card h3{font-size:1.05rem;margin-bottom:6px} .card p{font-size:.92rem;color:var(--ink-2);margin:0}
+.card .k{font:700 .7rem/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:10px}
+.formula{font:500 .9rem/1.7 var(--mono);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:12px 16px;overflow-x:auto;margin:16px 0;color:var(--ink)}
+/* 6 · Screen */
+.screen{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:20px;margin-top:24px;align-items:start}
+.mapcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-soft);overflow:hidden;position:sticky;top:calc(var(--header) + 12px)}
+.metric{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.metric .btn{min-height:34px;padding:5px 11px;font-size:.8rem}
+#map{display:block;width:100%;height:auto}
+#map .d{stroke:var(--surface);stroke-width:1.6;cursor:pointer;transition:fill .35s}
+#map .d:hover,#map .d.sel{stroke:var(--ink);stroke-width:2.2}
+#map .lbl{font:600 11px var(--sans);fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:3.5px;stroke-linejoin:round;pointer-events:none}
+#map .inset{fill:none;stroke:var(--line-2);stroke-dasharray:4 4}
+#map .note{font:500 10px var(--sans);fill:var(--ink-3)}
+.map-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 14px;border-top:1px solid var(--line);font-size:.76rem;color:var(--ink-2)}
+.ramp{display:flex;gap:2px} .ramp i{width:26px;height:10px;border-radius:2px}
+.ramp-lab{display:flex;justify-content:space-between;font-size:.7rem;color:var(--ink-3)}
+.swatch-nd{width:16px;height:10px;border-radius:2px;background:repeating-linear-gradient(45deg,var(--nodata) 0 3px,var(--line-2) 3px 4px)}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--line-2);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.15);padding:8px 10px;font-size:.8rem;max-width:240px;z-index:5}
+.tip b{display:block}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-soft);padding:18px;margin-bottom:14px}
+.panel h3{font:700 .74rem/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.field{display:grid;gap:4px;margin-bottom:12px}
+.field label,.field .lab{display:flex;justify-content:space-between;gap:10px;font-weight:600;font-size:.9rem}
+.field output{color:var(--accent);font-variant-numeric:tabular-nums}
+.field .help{font-size:.8rem;color:var(--ink-3);line-height:1.4}
+input[type=range]{width:100%;accent-color:var(--accent);height:32px}
+.num{width:100%;min-height:40px;padding:8px 10px;border:1px solid var(--line-2);border-radius:8px;background:var(--bg);font-variant-numeric:tabular-nums}
+.num:invalid{border-color:var(--loss)}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px} .chips .btn{min-height:34px;padding:5px 12px;font-size:.8rem}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:.88rem;cursor:pointer}
+.check input{margin-top:4px;accent-color:var(--accent)}
+/* results */
+.headline{font:400 clamp(1.15rem,1rem + .6vw,1.45rem)/1.4 var(--serif);margin:0 0 14px;max-width:44rem}
+.share{margin:14px 0}
+.share-row{display:grid;grid-template-columns:7.5rem 1fr;gap:10px;align-items:center;font-size:.82rem;color:var(--ink-2);margin-bottom:6px}
+.sbar{display:flex;height:16px;border-radius:4px;overflow:hidden;background:var(--line);gap:2px}
+.sbar span{display:block;height:100%;transition:width .5s}
+.c-piped{background:var(--water)} .c-kiosk{background:var(--loss)} .c-other{background:var(--ink-3)}
+.key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.8rem;color:var(--ink-2)} .key i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin-top:14px}
+table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:640px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--surface-2);font-weight:700}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:0}
+tbody tr.sel td{background:var(--accent-soft)}
+.tier{display:inline-block;min-width:1.8em;text-align:center;font-weight:700;font-size:.75rem;border-radius:5px;padding:2px 6px;background:var(--surface-2);color:var(--ink-2)}
+.tier.H{background:var(--loss);color:#fff} .tier.M{background:var(--q2);color:#10242d} .tier.L{background:var(--q0);color:var(--ink-2)}
+.muted{color:var(--ink-3)}
+.data-grid input{width:100%;min-width:5.5rem;min-height:36px;padding:6px 8px;border:1px solid var(--line-2);border-radius:6px;background:var(--bg);text-align:right;font-variant-numeric:tabular-nums}
+.data-grid input.bad{border-color:var(--loss);box-shadow:0 0 0 1px var(--loss) inset}
+.data-grid input[type=text]{text-align:left}
+details.box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);margin-top:16px}
+details.box>summary{cursor:pointer;list-style:none;padding:16px 20px;font-weight:700;display:flex;justify-content:space-between;gap:12px;align-items:center}
+details.box>summary::-webkit-details-marker{display:none}
+details.box>summary::after{content:"+";font:400 1.4rem/1 var(--sans);color:var(--ink-3)}
+details.box[open]>summary::after{content:"−"}
+details.box>summary small{display:block;font-weight:400;color:var(--ink-3);font-size:.82rem}
+.box-body{padding:0 20px 20px}
+textarea{width:100%;min-height:140px;padding:10px;border:1px solid var(--line-2);border-radius:8px;background:var(--bg);font:500 .8rem/1.5 var(--mono)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.msg{font-size:.85rem;min-height:1.4em;margin-top:8px}
+.msg.bad{color:var(--loss)} .msg.ok{color:var(--gain)}
+/* 7 · Catalog */
+.cat-filter{display:flex;flex-wrap:wrap;gap:6px;margin:20px 0 6px}
+.cat{display:grid;gap:12px;margin-top:12px}
+.ds{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-soft);padding:16px 20px;display:grid;grid-template-columns:4rem minmax(0,1fr);gap:4px 14px}
+.ds .id{font:700 .8rem/1.6 var(--mono);color:var(--ink-3)}
+.ds h3{font-size:1rem;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.ds dl{display:grid;grid-template-columns:8.5rem minmax(0,1fr);gap:4px 12px;margin:8px 0 0;font-size:.86rem}
+.ds dt{color:var(--ink-3)} .ds dd{margin:0;color:var(--ink-2)}
+.ds .cannot{color:var(--loss)}
+/* 8 · Methods */
+.outline{counter-reset:o;list-style:none;padding:0;margin:20px 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.outline li{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;font-size:.9rem;color:var(--ink-2)}
+.outline li b{display:block;color:var(--ink)}
+.timeline{list-style:none;padding:0;margin:20px 0 0;border-left:2px solid var(--line-2)}
+.timeline li{position:relative;padding:0 0 16px 20px;font-size:.92rem;color:var(--ink-2)}
+.timeline li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)}
+.timeline b{color:var(--ink)}
+pre.email{white-space:pre-wrap;font:500 .82rem/1.6 var(--mono);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:14px;margin:8px 0 0}
+.limits li{margin-bottom:6px;color:var(--ink-2)}
+footer{border-top:1px solid var(--line);padding:28px 0 calc(28px + env(safe-area-inset-bottom,0px));font-size:.82rem;color:var(--ink-3)}
+/* 9 · Responsive & motion */
+@media (max-width:980px){.screen{grid-template-columns:1fr}.mapcard{position:static}.cards3,.outline{grid-template-columns:1fr}.status{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.nav{display:none}.ds{grid-template-columns:1fr}.ds dl{grid-template-columns:1fr}.ds dt{margin-top:6px}.row3{grid-template-columns:1fr}.share-row{grid-template-columns:1fr;gap:4px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{.site-header,.toolbar,.metric{display:none}.mapcard{position:static}}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="wrap">
+ <a class="brand" href="index.html"><b>THE WATER BELOW</b><span>Risk screen · work in progress</span></a>
+ <nav class="nav" aria-label="Sections"><a href="#how">How it works</a><a href="#screen">Screen</a><a href="#data">Data</a><a href="#methods">Methods</a><a href="index.html#model">Mechanism ↗</a></nav>
+ <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch light or dark">◐</button>
+</div></header>
+
+<main>
+<section class="intro"><div class="wrap">
+ <div class="eyebrow"><span class="tag">Screening-level, not engineering-grade</span><span>Research in progress · Feb–Aug 2027</span></div>
+ <h1>Who bears the cost when Ulaanbaatar’s aquifer runs short?<span class="mn">Улаанбаатарын уст үе хомсдоход зардлыг хэн үүрэх вэ?</span></h1>
+ <p class="answer"><strong>Short answer so far: it can’t be priced yet. This page is the tool that will price it.</strong> One thing the evidence already shows: kiosk users get about 17 L per person per day, against a city-wide figure of about 190 L <a class="cite" href="#ds-D11">[D11]</a>. So any shortage pushes them below the basic-need line first, at roughly 20 L <a class="cite" href="#ds-D12">[D12]</a>. The cohorts behind those two figures are not directly comparable.</p>
+ <dl class="status" aria-label="What is loaded">
+  <div><dt>District data</dt><dd id="stDistricts">0 of 9</dd></div>
+  <div><dt>Prices</dt><dd id="stPrices">0 of 3</dd></div>
+  <div><dt>Shortage probability</dt><dd id="stProb">Not set</dd></div>
+  <div><dt>Hazard</dt><dd>City-wide scenario</dd></div>
+ </dl>
+</div></section>
+
+<section class="section" id="how"><div class="wrap">
+ <h2>How the screen works</h2>
+ <p class="lede">Each district is tiered on three things. A shortage then gets priced by what households must buy to stay above basic need.</p>
+ <div class="cards3">
+  <div class="card"><span class="k">Hazard · city-wide</span><h3>How short the supply falls</h3><p>Satellite gravity data (GRACE) can’t tell districts apart: all of Ulaanbaatar sits inside one ~300 km cell <a class="cite" href="#ds-D01">[D01]</a>. So the hazard is a single shortfall scenario for the whole city, checked against published Tuul modelling <a class="cite" href="#ds-D09">[D09]</a> <a class="cite" href="#ds-D10">[D10]</a>.</p></div>
+  <div class="card"><span class="k">Exposure · by district</span><h3>Who a shortfall reaches</h3><p>The number of people multiplied by the share of their supply that comes from the central Tuul wellfields <a class="cite" href="#ds-D05">[D05]</a> <a class="cite" href="#ds-D15">[D15]</a>. Nearly all city water is groundwater <a class="cite" href="#ds-D14">[D14]</a>.</p></div>
+  <div class="card"><span class="k">Vulnerability · by district</span><h3>How close to the edge they live</h3><p>The share of people on kiosk or other non-piped supply. Starting from 17 L, there is no slack: lost water must be bought back at a higher price, or done without.</p></div>
+ </div>
+ <div class="formula">cut = shortfall × wellfield share<br>replaced (L/day) = min( cut × use , max(0, B − use × (1 − cut)) )<br>extra cost per person per year = 365 × replaced / 1000 × (replacement price − usual price)<br>cut, not bought (L/day) = cut × use − replaced          expected annual cost = scenario cost × annual probability</div>
+ <p class="fine">B is the basic-need line (default 20 L, WHO <a class="cite" href="#ds-D12">[D12]</a>). Above B, households are assumed to cut use rather than buy. That cut is reported in litres, not money, because we have no sourced value for it. For piped households it is mostly discretionary use; for kiosk users it is water they go without. Prices are per m³.</p>
+</div></section>
+
+<section class="section" id="screen"><div class="wrap">
+ <h2>The screen</h2>
+ <p class="lede">Every number below is either loaded from a cited source or set by you. Until district data and prices are entered, the map shows outlines only. No values are filled in for you.</p>
+ <div class="screen">
+  <div class="mapcard" id="mapcard">
+   <div class="metric" role="group" aria-label="Map shows">
+    <button class="btn" type="button" data-metric="cost">Extra cost / person / year</button>
+    <button class="btn" type="button" data-metric="litres">Litres bought back / day</button>
+    <button class="btn" type="button" data-metric="vuln">Share not piped</button>
+    <button class="btn" type="button" data-metric="exposed">People exposed</button>
+   </div>
+   <svg id="map" role="img" aria-labelledby="mapTitle mapDesc"><title id="mapTitle">Ulaanbaatar districts</title><desc id="mapDesc"></desc></svg>
+   <div class="map-legend"><div><div class="ramp" id="ramp"></div><div class="ramp-lab"><span id="rampLo">low</span><span id="rampHi">high</span></div></div><span><i class="swatch-nd" style="display:inline-block;vertical-align:middle;margin-right:6px"></i>No data yet</span><span id="metricNote" class="muted"></span></div>
+  </div>
+  <div>
+   <div class="panel">
+    <h3>Hazard scenario <span class="tag">Assumption</span></h3>
+    <div class="chips" role="group" aria-label="Scenario"><button class="btn" type="button" data-sc="10">Mild · 10%</button><button class="btn" type="button" data-sc="25">Serious · 25%</button><button class="btn" type="button" data-sc="40">Severe · 40%</button></div>
+    <div class="field"><label for="shortfall">Supply shortfall from the central wellfields <output id="shortfallOut"></output></label><input id="shortfall" type="range" min="0" max="60" step="1"><span class="help">The three presets are illustrative scenarios, not forecasts. Replace them once the GRACE trend and published modelling are in.</span></div>
+    <div class="field"><label for="basic">Basic-need line B <output id="basicOut"></output></label><input id="basic" type="range" min="10" max="50" step="1"><span class="help">Default 20 L per person per day: WHO basic access <a class="cite" href="#ds-D12">[D12]</a>.</span></div>
+   </div>
+   <div class="panel">
+    <h3>Daily use per person (litres)</h3>
+    <div class="row3">
+     <div class="field"><span class="lab">Piped</span><input class="num" id="usePiped" type="number" min="0" max="500" step="1" inputmode="decimal"></div>
+     <div class="field"><span class="lab">Kiosk</span><input class="num" id="useKiosk" type="number" min="0" max="500" step="1" inputmode="decimal"></div>
+     <div class="field"><span class="lab">Other</span><input class="num" id="useOther" type="number" min="0" max="500" step="1" inputmode="decimal" placeholder="enter"></div>
+    </div>
+    <p class="fine">Defaults: piped 190 (the city-wide figure, which includes non-household use) and kiosk 17 <a class="cite" href="#ds-D11">[D11]</a>. Replace them with household survey figures when you have them. “Other” covers private wells, trucks and vendors.</p>
+   </div>
+   <div class="panel">
+    <h3>Prices, MNT per m³ <span class="tag todo">To source</span></h3>
+    <div class="row3">
+     <div class="field"><span class="lab">Piped tariff</span><input class="num" id="pPiped" type="number" min="0" step="any" placeholder="from D06" inputmode="decimal"></div>
+     <div class="field"><span class="lab">Kiosk price</span><input class="num" id="pKiosk" type="number" min="0" step="any" placeholder="from D06" inputmode="decimal"></div>
+     <div class="field"><span class="lab">Replacement</span><input class="num" id="pRep" type="number" min="0" step="any" placeholder="from D07" inputmode="decimal"></div>
+    </div>
+    <p class="fine">Left blank on purpose. Enter the current tariff order <a class="cite" href="#ds-D06">[D06]</a> and observed truck or vendor prices <a class="cite" href="#ds-D07">[D07]</a>. Until then, results are shown in litres. For “other” households, the kiosk price stands in for their usual price.</p>
+   </div>
+   <div class="panel">
+    <h3>Expected annual cost <span class="tag">Assumption</span></h3>
+    <label class="check"><input type="checkbox" id="useProb"> <span>Multiply by an annual probability of this shortfall. There is no published value for it, so it is yours to justify.</span></label>
+    <div class="field" id="probField" hidden style="margin-top:10px"><label for="prob">Annual probability <output id="probOut"></output></label><input id="prob" type="range" min="1" max="100" step="1"></div>
+   </div>
+  </div>
+ </div>
+
+ <div class="panel" style="margin-top:20px" id="results">
+  <h3>Who bears the cost?</h3>
+  <p class="headline" id="headline"></p>
+  <div class="share" id="shareBlock" hidden>
+   <div class="share-row"><span>Share of people</span><div class="sbar" id="barPeople"></div></div>
+   <div class="share-row"><span id="barCostLab">Share of cost</span><div class="sbar" id="barCost"></div></div>
+   <div class="key"><span><i class="c-piped"></i>Piped</span><span><i class="c-kiosk"></i>Kiosk</span><span><i class="c-other"></i>Other</span></div>
+  </div>
+  <div class="table-wrap"><table id="resTable"><caption class="sr-only">Results by district</caption><thead><tr><th>District</th><th class="n">People</th><th class="n">Not piped</th><th>Exposure</th><th>Hazard</th><th>Vulner&shy;ability</th><th class="n">Bought back L/day</th><th class="n">Cut, not bought L/day</th><th class="n" id="costHead">Extra cost / yr</th></tr></thead><tbody></tbody></table></div>
+  <p class="fine" style="margin-top:10px">Tiers split the districts into thirds (H, M, L) on each measure. The hazard is the same for every district because it is one city-wide scenario. People-weighted averages; “bought back” and “unmet” are per person.</p>
+ </div>
+
+ <details class="box" id="dataBox">
+  <summary><span>District data<small>Enter from the census tables <a class="cite" href="#ds-D05">[D05]</a> and the utility’s service areas <a class="cite" href="#ds-D15">[D15]</a>. Saved in this browser only.</small></span></summary>
+  <div class="box-body">
+   <div class="table-wrap"><table class="data-grid" id="dataGrid"><thead><tr><th>District</th><th class="n">Population</th><th class="n">% piped</th><th class="n">% kiosk</th><th class="n">% other</th><th class="n">% central wellfields</th><th>Source & year</th></tr></thead><tbody></tbody></table></div>
+   <p class="fine">The three shares must add up to 100. A blank wellfield share is treated as 100% and flagged in the results.</p>
+   <div class="toolbar"><button class="btn" type="button" id="exportBtn">Download as CSV</button><button class="btn" type="button" id="clearBtn">Clear all district data</button></div>
+   <p class="msg" id="clearMsg" aria-live="polite"></p>
+   <h3 style="font-size:.95rem;margin-top:18px">Paste CSV</h3>
+   <p class="fine">Columns: <code>district_id,population,share_piped_pct,share_kiosk_pct,share_other_pct,share_central_wellfields_pct,source</code>. District IDs: <span id="idList"></span>.</p>
+   <textarea id="csvIn" spellcheck="false" aria-label="CSV to import"></textarea>
+   <div class="toolbar"><button class="btn btn-primary" type="button" id="importBtn">Import</button></div>
+   <p class="msg" id="importMsg" aria-live="polite"></p>
+  </div>
+ </details>
+</div></section>
+
+<section class="section" id="data"><div class="wrap">
+ <h2>Data catalog</h2>
+ <p class="lede">Every dataset the screen uses or will use: what it measures, its resolution, how to get it, and what it cannot support. Well locations are confidential in Mongolia, so we work only with aggregated or anonymized data and never scrape or guess well points <a class="cite" href="#ds-D08">[D08]</a>.</p>
+ <div class="cat-filter" role="group" aria-label="Filter by status">
+  <button class="btn" type="button" data-filter="all" aria-pressed="true">All</button>
+  <button class="btn" type="button" data-filter="inhand">In hand</button>
+  <button class="btn" type="button" data-filter="download">To download</button>
+  <button class="btn" type="button" data-filter="request">To request</button>
+  <button class="btn" type="button" data-filter="restricted">Restricted</button>
+ </div>
+ <div class="cat" id="cat"></div>
+ <div class="toolbar"><button class="btn" type="button" id="catCsv">Download catalog as CSV</button></div>
+</div></section>
+
+<section class="section" id="methods"><div class="wrap">
+ <h2>Methods</h2>
+ <p class="lede">The full method will be a six-page PDF. This is its outline and the rules it will follow.</p>
+ <h3 style="margin-top:24px;font-size:1.05rem">What this screen deliberately does not do</h3>
+ <ul class="limits">
+  <li>It does not estimate groundwater by district. GRACE’s footprint is about 300 km, and well data are confidential.</li>
+  <li>It does not forecast. Shortfall scenarios are labelled assumptions; the GRACE trend and published models only bound them.</li>
+  <li>It does not give a welfare value for water people go without. That loss is reported in litres.</li>
+  <li>It treats dwelling type as a proxy for connection type. These are not the same, and the gap will be stated.</li>
+  <li>It is not engineering-grade. Use it to ask better questions, not to size infrastructure.</li>
+ </ul>
+ <h3 style="margin-top:24px;font-size:1.05rem">Six-page methods PDF: outline</h3>
+ <ol class="outline">
+  <li><b>1 · Question and scope</b>Who bears the cost of a groundwater shortfall in Ulaanbaatar; a screening-level framing; what “cost” includes and excludes.</li>
+  <li><b>2 · Hazard</b>GRACE/GRACE-FO storage minus GLDAS soil moisture and snow; trend with uncertainty; comparison with Nakayama et al. (2021) and Dechinlkhundev &amp; Zorigt (2021); how scenarios are set.</li>
+  <li><b>3 · Exposure and vulnerability</b>Census population and dwelling type by district; wellfield service shares; the proxy problem.</li>
+  <li><b>4 · Cost rule</b>The basic-need replacement rule; price sources; scenario versus expected cost; worked example for one district.</li>
+  <li><b>5 · Results and sensitivity</b>Tiers; the share of people versus the share of cost; which assumptions move the answer most.</li>
+  <li><b>6 · Limits, review and data catalog</b>What would make it engineering-grade; reviewer comments; a pointer to the catalog and repository.</li>
+ </ol>
+ <h3 style="margin-top:28px;font-size:1.05rem">Timeline</h3>
+ <ol class="timeline">
+  <li><b>Now – Jan 2027 · head start.</b> Send data requests (census tables, tariff order, wellfield service areas). Register Earthdata and Copernicus accounts.</li>
+  <li><b>Feb – Mar 2027 · hazard.</b> Run the GRACE script; subtract GLDAS; trend and uncertainty; compare with the published papers.</li>
+  <li><b>Apr – May 2027 · economics.</b> Enter district data and prices; sensitivity runs; draft methods pages 1–4.</li>
+  <li><b>June 2027 · soft launch.</b> Publish the screen with real inputs; send methods-critique requests.</li>
+  <li><b>Jul – Aug 2027 · finish.</b> Fold in comments; finish the six-page PDF; Mongolian/English summary; final data catalog.</li>
+ </ol>
+ <details class="box">
+  <summary><span>Email drafts<small>Data requests and a methods-review request (English; write the Mongolian versions yourself)</small></span></summary>
+  <div class="box-body">
+   <h3 style="font-size:.95rem">1 · National Statistics Office: table request</h3>
+<pre class="email">Subject: Request for district/khoroo tables: population and dwelling type, Ulaanbaatar
+
+Dear colleagues,
+
+I am a student building an open, screening-level study of how a groundwater shortfall would affect households in Ulaanbaatar. Could you tell me whether the following tables are available, and how to obtain them?
+
+1. Population and number of households by district and, if possible, by khoroo (2020 census and the latest annual estimate).
+2. Households by dwelling type (ger / detached house / apartment) at the same level.
+3. Any variable on the household's main water source or connection type.
+
+The study will cite the Office as the source and publish only aggregated figures.
+
+Thank you for your help,
+[Name], [affiliation], [email]</pre>
+   <h3 style="font-size:.95rem;margin-top:16px">2 · Water utility: tariffs and service areas</h3>
+<pre class="email">Subject: Current water tariffs and wellfield service areas: student research request
+
+Dear colleagues,
+
+For an open, screening-level study of water-shortage costs in Ulaanbaatar, I would be grateful for:
+
+1. The current approved tariff for piped households and for kiosk water (MNT per m³), with the tariff order number and date.
+2. Which districts are supplied from the central Tuul wellfields, and roughly what share of their supply comes from local sources instead.
+3. Any published price for water delivered by truck.
+
+I do not need well locations. Only aggregated, publishable information will be used, cited to the utility.
+
+Thank you,
+[Name], [affiliation], [email]</pre>
+   <h3 style="font-size:.95rem;margin-top:16px">3 · Researchers: methods critique</h3>
+<pre class="email">Subject: Request for a short methods critique: Ulaanbaatar groundwater risk screen
+
+Dear Dr. [Name],
+
+I have read your work on [specific paper or topic]. I am building an open, screening-level screen of who bears the cost when Ulaanbaatar's groundwater supply falls short. It combines a GRACE/GRACE-FO storage trend (city-wide only), census exposure data and a simple basic-need cost rule. The methods are summarised on one page here: [URL]
+
+Would you be willing to spend 15 minutes telling me what is wrong or missing? Even a one-line reply would help. Any comment you allow me to cite will be credited.
+
+With thanks,
+[Name], [affiliation], [email]</pre>
+  </div>
+ </details>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+ <p>Screening-level, not engineering-grade. Boundaries: geoBoundaries (National Statistics Office of Mongolia, OCHA ROAP), CC BY 3.0 IGO, simplified for display. District data you enter stay in your browser.</p>
+ <p><a href="index.html">← Back to THE WATER BELOW</a> · <a href="index.html#model">The groundwater model (mechanism)</a></p>
+</div></footer>
+
+<script>
+const GEOM=[{"id":"BND","mn":"Багануур","en":"Baganuur","rings":[[[72.6723,-47.9479],[72.6705,-47.9484],[72.6677,-47.953],[72.6657,-47.9539],[72.6651,-47.9563],[72.6608,-47.958],[72.6562,-47.955],[72.6522,-47.9547],[72.6377,-47.9693],[72.6343,-47.9697],[72.6318,-47.9686],[72.6281,-47.9743],[72.621,-47.9734],[72.6198,-47.9723],[72.6165,-47.973],[72.6115,-47.9783],[72.6099,-47.9786],[72.606,-47.9767],[72.6011,-47.9807],[72.5901,-47.9834],[72.5882,-47.9872],[72.5604,-47.9878],[72.5443,-47.9291],[72.5604,-47.6849],[72.5678,-47.6846],[72.603,-47.6661],[72.7203,-47.6912],[72.7313,-47.7017],[72.7299,-47.7093],[72.7344,-47.7158],[72.7343,-47.7186],[72.7312,-47.7223],[72.7288,-47.7291],[72.7288,-47.7332],[72.7358,-47.7387],[72.7373,-47.7426],[72.7409,-47.7435],[72.7418,-47.7464],[72.7411,-47.7483],[72.7342,-47.7494],[72.7392,-47.757],[72.7365,-47.7627],[72.729,-47.7668],[72.7242,-47.7656],[72.7221,-47.7674],[72.7272,-47.7759],[72.7334,-47.7803],[72.7329,-47.7827],[72.7291,-47.784],[72.7291,-47.7861],[72.7312,-47.7881],[72.7294,-47.7913],[72.7297,-47.8013],[72.7281,-47.8041],[72.7285,-47.8066],[72.7255,-47.8085],[72.7246,-47.8106],[72.7255,-47.813],[72.7284,-47.8143],[72.7262,-47.8217],[72.7284,-47.8298],[72.7235,-47.8344],[72.7275,-47.839],[72.725,-47.8425],[72.726,-47.8471],[72.723,-47.8536],[72.7255,-47.8572],[72.724,-47.8605],[72.7182,-47.8592],[72.7165,-47.86],[72.716,-47.8617],[72.7193,-47.8659],[72.7177,-47.8699],[72.7207,-47.8694],[72.7221,-47.8706],[72.7227,-47.8731],[72.7208,-47.875],[72.7248,-47.8769],[72.726,-47.883],[72.7313,-47.8865],[72.7325,-47.8908],[72.732,-47.8934],[72.7372,-47.8971],[72.7354,-47.9022],[72.7407,-47.9055],[72.7372,-47.9102],[72.7397,-47.9141],[72.7391,-47.9173],[72.725,-47.9303],[72.7197,-47.9303],[72.7185,-47.9321],[72.717,-47.9314],[72.7175,-47.9335],[72.7132,-47.9361],[72.711,-47.9354],[72.7085,-47.9379],[72.7024,-47.9381],[72.7007,-47.941],[72.6958,-47.9399],[72.6937,-47.9425],[72.6872,-47.942],[72.6843,-47.9441],[72.6754,-47.9447],[72.6723,-47.9479]]]},{"id":"BKhD","mn":"Багахангай","en":"Bagakhangai","rings":[[[72.063,-47.4369],[72.0229,-47.4328],[72.0052,-47.4414],[71.9747,-47.4245],[71.9681,-47.3973],[72.0157,-47.302],[72.0765,-47.3211],[72.1072,-47.3316],[72.063,-47.4369]]]},{"id":"BGD","mn":"Баянгол","en":"Bayangol","rings":[[[71.6649,-47.9154],[71.6685,-47.9206],[71.657,-47.9353],[71.6552,-47.9417],[71.65,-47.9446],[71.6439,-47.9445],[71.6394,-47.9204],[71.6392,-47.9136],[71.5923,-47.9074],[71.5922,-47.9049],[71.5908,-47.8748],[71.592,-47.8748],[71.6061,-47.8823],[71.6105,-47.883],[71.6212,-47.8965],[71.6328,-47.9012],[71.6476,-47.9048],[71.6663,-47.9017],[71.6772,-47.9064],[71.6772,-47.9077],[71.6651,-47.9081],[71.6649,-47.9154]]]},{"id":"BZD","mn":"Баянзүрх","en":"Bayanzürkh","rings":[[[71.7139,-48.1973],[71.7278,-48.1532],[71.7386,-48.1232],[71.752,-48.0983],[71.7572,-48.0664],[71.7586,-48.0368],[71.7551,-48.0288],[71.7476,-48.0187],[71.7381,-48.0106],[71.7369,-47.9825],[71.7052,-47.9717],[71.6864,-47.9611],[71.6879,-47.9559],[71.6871,-47.9526],[71.6883,-47.9508],[71.6867,-47.9485],[71.6852,-47.9483],[71.6855,-47.9441],[71.6884,-47.9383],[71.6917,-47.9193],[71.6895,-47.9102],[71.6903,-47.9074],[71.6862,-47.9074],[71.6942,-47.8909],[71.6954,-47.884],[71.7005,-47.8799],[71.7059,-47.8642],[71.7067,-47.8619],[71.6931,-47.82],[71.7001,-47.7603],[71.7111,-47.7439],[71.7578,-47.7355],[71.7632,-47.7216],[71.816,-47.7235],[71.8579,-47.7472],[71.8816,-47.7247],[71.8884,-47.7614],[71.8829,-47.7809],[71.8914,-47.8155],[71.932,-47.802],[71.949,-47.8596],[71.9796,-47.8791],[71.9851,-47.9017],[72.011,-47.9431],[71.9803,-47.963],[71.9859,-47.9907],[71.9667,-48.0359],[71.9513,-48.0612],[71.934,-48.0773],[71.9058,-48.1099],[71.8863,-48.1353],[71.8685,-48.1426],[71.8447,-48.1639],[71.8127,-48.1757],[71.7907,-48.209],[71.7713,-48.1887],[71.7566,-48.1868],[71.7303,-48.2087],[71.7152,-48.1993],[71.7139,-48.1973]]]},{"id":"CHD","mn":"Чингэлтэй","en":"Chingeltei","rings":[[[71.6649,-47.9154],[71.6796,-47.9164],[71.678,-47.9286],[71.6711,-47.9283],[71.6712,-47.9296],[71.6745,-47.9368],[71.6784,-47.9401],[71.6779,-47.9512],[71.6805,-47.9729],[71.6815,-47.9762],[71.6848,-47.9769],[71.6859,-47.9832],[71.6873,-47.9833],[71.6885,-47.9852],[71.689,-47.9908],[71.6873,-47.9949],[71.6886,-47.9964],[71.6878,-47.9984],[71.69,-48.0014],[71.69,-48.004],[71.6893,-48.0064],[71.6876,-48.007],[71.6869,-48.011],[71.6854,-48.0117],[71.6829,-48.0163],[71.681,-48.0172],[71.6812,-48.0187],[71.68,-48.0199],[71.679,-48.0239],[71.6804,-48.0253],[71.6798,-48.0273],[71.6808,-48.0275],[71.6804,-48.0315],[71.6777,-48.0339],[71.6756,-48.0392],[71.6727,-48.0411],[71.67,-48.0458],[71.6699,-48.0499],[71.6675,-48.053],[71.6675,-48.0583],[71.6648,-48.0664],[71.6652,-48.0697],[71.6666,-48.0701],[71.6662,-48.0714],[71.6651,-48.076],[71.6661,-48.078],[71.6653,-48.0779],[71.6645,-48.0845],[71.6628,-48.0859],[71.6627,-48.0898],[71.6591,-48.0939],[71.6604,-48.0973],[71.6583,-48.1007],[71.6578,-48.1038],[71.6593,-48.1056],[71.6585,-48.1062],[71.659,-48.109],[71.663,-48.1169],[71.6614,-48.1238],[71.6604,-48.1263],[71.6537,-48.1299],[71.6455,-48.1385],[71.6441,-48.1391],[71.6372,-48.1258],[71.6227,-48.1042],[71.631,-48.0674],[71.6382,-48.0449],[71.6418,-48.0368],[71.6439,-48.0224],[71.6395,-47.9832],[71.645,-47.9698],[71.6436,-47.9488],[71.6552,-47.9417],[71.657,-47.9353],[71.6609,-47.9292],[71.6675,-47.9225],[71.6685,-47.9206],[71.6649,-47.9154]]]},{"id":"NLD","mn":"Налайх","en":"Nalaikh","rings":[[[71.8816,-47.7247],[71.9137,-47.6884],[71.9331,-47.6685],[71.9345,-47.648],[71.9568,-47.6516],[72.0054,-47.6463],[72.055,-47.6519],[72.06,-47.7207],[72.0967,-47.7459],[72.0978,-47.785],[72.1115,-47.835],[72.1082,-47.8525],[72.1111,-47.8556],[72.1141,-47.8552],[72.1158,-47.8584],[72.1217,-47.8612],[72.1332,-47.8727],[72.1381,-47.8719],[72.1402,-47.8749],[72.1432,-47.8755],[72.1432,-47.8812],[72.1452,-47.8827],[72.1463,-47.8885],[72.1501,-47.8939],[72.1488,-47.8996],[72.1521,-47.9068],[72.1482,-47.9096],[72.1458,-47.9147],[72.1425,-47.9142],[72.1401,-47.917],[72.1365,-47.9268],[72.1361,-47.9342],[72.1312,-47.9445],[72.1312,-47.9509],[72.1372,-47.9597],[72.1347,-47.965],[72.1353,-47.9681],[72.1333,-47.9667],[72.1304,-47.9673],[72.1246,-47.9729],[72.1236,-47.9716],[72.1216,-47.9736],[72.1156,-47.973],[72.1165,-47.9753],[72.113,-47.9748],[72.1127,-47.9756],[72.108,-47.976],[72.1042,-47.9784],[72.1004,-47.9764],[72.0975,-47.9776],[72.0967,-47.9762],[72.0915,-47.9746],[72.0898,-47.9725],[72.0851,-47.9729],[72.0828,-47.9708],[72.0794,-47.97],[72.0759,-47.9715],[72.0733,-47.9712],[72.0712,-47.9729],[72.0661,-47.9705],[72.0573,-47.973],[72.0549,-47.975],[72.054,-47.9817],[72.0515,-47.9869],[72.0485,-47.9885],[72.0471,-47.9914],[72.0431,-47.9937],[72.0433,-48.0004],[72.0346,-47.9961],[71.9857,-47.9907],[71.9803,-47.963],[72.011,-47.9431],[71.9851,-47.9017],[71.9796,-47.8791],[71.949,-47.8596],[71.932,-47.802],[71.8914,-47.8155],[71.8829,-47.7809],[71.8884,-47.7614],[71.8816,-47.7247]]]},{"id":"SKhD","mn":"Сонгинохайрхан","en":"Songinokhairkhan","rings":[[[71.4273,-47.847],[71.4761,-47.8506],[71.4963,-47.8711],[71.498,-47.8715],[71.5177,-47.8726],[71.5293,-47.8698],[71.535,-47.865],[71.5415,-47.8661],[71.543,-47.869],[71.5456,-47.87],[71.5498,-47.8683],[71.5519,-47.8721],[71.5545,-47.8742],[71.5597,-47.8739],[71.5623,-47.8754],[71.5661,-47.8749],[71.5729,-47.8784],[71.5744,-47.8783],[71.5778,-47.875],[71.5823,-47.8773],[71.5908,-47.8748],[71.5923,-47.9074],[71.6392,-47.9136],[71.6394,-47.9204],[71.6435,-47.9444],[71.65,-47.9446],[71.6436,-47.9488],[71.645,-47.9698],[71.6395,-47.9832],[71.6439,-48.0224],[71.6418,-48.0368],[71.6384,-48.0443],[71.631,-48.0674],[71.6227,-48.1042],[71.6372,-48.1258],[71.6442,-48.1393],[71.6466,-48.1534],[71.6472,-48.1684],[71.652,-48.185],[71.6174,-48.2171],[71.5636,-48.2278],[71.519,-48.2319],[71.5068,-48.2376],[71.4747,-48.232],[71.4604,-48.2448],[71.3998,-48.2538],[71.3688,-48.2649],[71.3615,-48.2719],[71.3083,-48.2585],[71.3115,-48.2462],[71.3385,-48.1973],[71.3527,-48.1492],[71.3448,-48.1342],[71.3869,-48.0732],[71.3743,-48.0421],[71.3733,-48.0133],[71.3882,-47.9807],[71.4185,-47.9576],[71.4045,-47.9465],[71.4227,-47.9109],[71.4111,-47.8901],[71.4132,-47.8712],[71.4273,-47.847]]]},{"id":"SBD","mn":"Сүхбаатар","en":"Sükhbaatar","rings":[[[71.652,-48.185],[71.6472,-48.1684],[71.6466,-48.1534],[71.6441,-48.1391],[71.6537,-48.1299],[71.6604,-48.1263],[71.6614,-48.1238],[71.663,-48.1169],[71.659,-48.109],[71.6585,-48.1062],[71.6593,-48.1056],[71.6578,-48.1038],[71.6583,-48.1007],[71.6604,-48.0973],[71.6591,-48.0939],[71.6628,-48.0897],[71.6628,-48.0859],[71.6645,-48.0845],[71.6653,-48.0779],[71.6661,-48.078],[71.6651,-48.076],[71.6666,-48.0701],[71.6652,-48.0697],[71.6648,-48.0664],[71.6675,-48.0583],[71.6675,-48.053],[71.6699,-48.0499],[71.67,-48.0458],[71.6727,-48.0411],[71.6756,-48.0392],[71.6777,-48.0339],[71.6804,-48.0315],[71.6808,-48.0275],[71.6798,-48.0273],[71.6804,-48.0253],[71.679,-48.0239],[71.68,-48.0199],[71.6812,-48.0187],[71.681,-48.0172],[71.6829,-48.0163],[71.6854,-48.0117],[71.6869,-48.011],[71.6877,-48.0076],[71.6893,-48.0064],[71.69,-48.004],[71.69,-48.0014],[71.6878,-47.9984],[71.6886,-47.9964],[71.6873,-47.9949],[71.689,-47.9908],[71.6885,-47.9852],[71.6873,-47.9833],[71.6859,-47.9832],[71.6848,-47.9769],[71.6815,-47.9762],[71.6805,-47.9729],[71.6779,-47.9512],[71.6784,-47.9401],[71.6745,-47.9368],[71.6711,-47.9283],[71.678,-47.9286],[71.6796,-47.9164],[71.6649,-47.9154],[71.6651,-47.9081],[71.6903,-47.9074],[71.6895,-47.9102],[71.6917,-47.9193],[71.6884,-47.9383],[71.6855,-47.9441],[71.6852,-47.9483],[71.6867,-47.9485],[71.6883,-47.9508],[71.6871,-47.9526],[71.6879,-47.9559],[71.6864,-47.9611],[71.7052,-47.9717],[71.7369,-47.9825],[71.7381,-48.0106],[71.7476,-48.0187],[71.7551,-48.0288],[71.7586,-48.0368],[71.7575,-48.0633],[71.7543,-48.0882],[71.752,-48.0983],[71.7386,-48.1232],[71.7322,-48.1401],[71.7139,-48.1973],[71.7097,-48.1911],[71.652,-48.185]]]},{"id":"KUD","mn":"Хан-Уул","en":"Khan-Uul","rings":[[[71.5325,-47.7295],[71.5559,-47.7205],[71.5941,-47.724],[71.5999,-47.7058],[71.6284,-47.7465],[71.6425,-47.7626],[71.6616,-47.7582],[71.6726,-47.749],[71.7002,-47.7604],[71.6931,-47.82],[71.7067,-47.8619],[71.7005,-47.8799],[71.6954,-47.884],[71.6942,-47.8909],[71.6862,-47.9074],[71.6772,-47.9077],[71.6772,-47.9064],[71.6663,-47.9017],[71.6476,-47.9048],[71.6328,-47.9012],[71.6212,-47.8965],[71.6111,-47.8836],[71.6074,-47.8825],[71.592,-47.8748],[71.5886,-47.8748],[71.5863,-47.8765],[71.5823,-47.8773],[71.5778,-47.875],[71.5744,-47.8783],[71.5729,-47.8784],[71.5661,-47.8749],[71.5623,-47.8754],[71.5597,-47.8739],[71.5559,-47.8746],[71.5529,-47.8731],[71.5498,-47.8683],[71.5456,-47.87],[71.543,-47.869],[71.5415,-47.8661],[71.535,-47.865],[71.5293,-47.8698],[71.5177,-47.8726],[71.498,-47.8715],[71.4963,-47.8711],[71.4761,-47.8506],[71.4273,-47.847],[71.4055,-47.8051],[71.4056,-47.7462],[71.4069,-47.7193],[71.4416,-47.7115],[71.4631,-47.7356],[71.4532,-47.7505],[71.4561,-47.7527],[71.4581,-47.7503],[71.4635,-47.7515],[71.4677,-47.7466],[71.4965,-47.7425],[71.5238,-47.736],[71.5325,-47.7295]]]}];
+const CATALOG=[{"id":"D01","name":"GRACE / GRACE-FO JPL Mascon (RL06.x)","provider":"NASA JPL, distributed by PO.DAAC","measures":"Monthly total water storage anomaly (snow + soil moisture + groundwater + surface water), cm of water","resolution":"0.5° grid, but the native mascon is ~3° (~300 km): all of Ulaanbaatar falls in one cell","period":"2002 to present, with an 11-month gap (Jul 2017 – May 2018) between the two missions","access":"Free, NASA Earthdata login","status":"download","role":"Hazard: one city-wide storage trend, after subtracting soil moisture and snow (D02)","cannot":"Any district-level or aquifer-specific difference; well levels; causes of change","url":"https://podaac.jpl.nasa.gov/dataset/TELLUS_GRAC-GRFO_MASCON_CRI_GRID_RL06.3_V4"},{"id":"D02","name":"GLDAS-2.1 Noah land surface model, monthly","provider":"NASA GES DISC","measures":"Modelled soil moisture and snow water equivalent, used to strip non-groundwater storage out of GRACE","resolution":"0.25°, monthly","period":"2000 to present","access":"Free, NASA Earthdata login","status":"download","role":"Hazard: groundwater ≈ GRACE storage − soil moisture − snow","cannot":"Frozen-ground and permafrost storage are poorly represented, so the residual carries that error","url":"https://disc.gsfc.nasa.gov/datasets/GLDAS_NOAH025_M_2.1/summary"},{"id":"D03","name":"ERA5-Land reanalysis","provider":"Copernicus Climate Change Service (ECMWF)","measures":"Precipitation, snowfall, snow depth, soil temperature (frozen-ground timing)","resolution":"0.1°, hourly (monthly means available)","period":"1950 to present","access":"Free, Copernicus account; Copernicus licence (attribution)","status":"download","role":"Context: whether storage changes line up with dry or wet years","cannot":"Groundwater use or levels; local station accuracy","url":"https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land"},{"id":"D04","name":"CHIRPS v2.0 precipitation","provider":"Climate Hazards Center, UC Santa Barbara","measures":"Rainfall estimates blended from satellite and stations","resolution":"0.05°, daily / monthly","period":"1981 to present, 50°S–50°N (Ulaanbaatar at ~47.9°N is inside)","access":"Free, open download","status":"download","role":"Cross-check for ERA5-Land precipitation","cannot":"Snowfall is weakly captured, which matters in a cold, snow-fed basin","url":"https://www.chc.ucsb.edu/data/chirps"},{"id":"D05","name":"Population and Housing Census 2020 and annual population tables","provider":"National Statistics Office of Mongolia (1212.mn)","measures":"Population and households by district (and possibly khoroo); dwelling type (ger vs apartment)","resolution":"District; khoroo availability to confirm","period":"2020 census; annual estimates","access":"Open tables; request for finer tables","status":"request","role":"Exposure (people) and vulnerability (dwelling type as a proxy for connection type)","cannot":"Dwelling type is not identical to water-connection type; check whether a connection variable exists","url":"https://www.1212.mn"},{"id":"D06","name":"Water tariff schedule (piped and kiosk)","provider":"Ulaanbaatar water utility (USUG) / the regulator that approves tariffs","measures":"Price per m³ for piped households and for kiosk water","resolution":"City-wide","period":"Current tariff order; earlier orders for history","access":"Public notices; confirm the current order","status":"request","role":"Prices for the cost calculator","cannot":"What households actually pay to private trucks or vendors during a shortage","url":""},{"id":"D07","name":"Price of trucked or vended replacement water","provider":"Utility delivery records, NGO or academic surveys, or your own price survey","measures":"What households pay when kiosk or piped supply fails","resolution":"Point observations","period":"To collect","access":"Survey or request","status":"request","role":"Replacement price in the cost calculator","cannot":"A city-wide average unless the sample supports it","url":""},{"id":"D08","name":"Anonymized well-level monitoring summaries","provider":"Water Authority of Mongolia (World Bank-supported dashboard)","measures":"Observation-well level series, anonymized","resolution":"Well level, but locations are confidential","period":"Varies","access":"Restricted. Request aggregated or anonymized statistics only; never scrape or guess well locations","status":"restricted","role":"Sanity check on the direction of the GRACE trend","cannot":"Public maps of well points (location sharing is restricted)","url":"https://blogs.worldbank.org/water/seeing-invisible-disrupting-groundwater-monitoring-mongolia"},{"id":"D09","name":"Nakayama, Wang & Okadera (2021), Ecological Modelling 440","provider":"Peer-reviewed paper (NICE eco-hydrology model, Tuul basin, 1980–2018)","measures":"Modelled groundwater-level change; attributes the decline mainly to Ulaanbaatar water use","resolution":"Basin model","period":"1980–2018","access":"Journal (preprint on ESS Open Archive)","status":"inhand","role":"Hydrology anchor: does our hazard direction agree with published modelling?","cannot":"A 2027 district-level number","url":"https://ideas.repec.org/a/eee/ecomod/v440y2021ics0304380020304671.html"},{"id":"D10","name":"Dechinlkhundev & Zorigt (2021), Journal of Water and Climate Change","provider":"Peer-reviewed paper (AnAqSim model, 10 Upper Tuul wellfields)","measures":"Wellfield response under climate scenarios","resolution":"Wellfield","period":"Calibration 1960–2015; scenario projections","access":"Open (DOAJ-listed)","status":"inhand","role":"Hazard scenarios: which wellfields are most sensitive","cannot":"Household costs; current conditions","url":"https://doaj.org/article/b3d2c59e377543c09dc2fe4af8c36830"},{"id":"D11","name":"OECD (2025) Water Demand Management in Mongolia (site source S02)","provider":"OECD & Asia Water Council","measures":"About 188–193 L per person per day city-wide, and about 17 L for kiosk users","resolution":"City; cohorts not directly comparable","period":"Earlier observations cited in 2025","access":"Open","status":"inhand","role":"Default daily-use inputs until household-level figures arrive","cannot":"A matched same-year comparison; the city figure includes non-household use","url":"https://www.oecd.org/en/publications/2025/04/water-demand-management-in-mongolia_1f3ff26f/full-report/water-as-a-key-factor-for-resilient-economic-growth_85bc1f8c.html"},{"id":"D12","name":"WHO (2020) Domestic water quantity, service level and health, 2nd ed.","provider":"World Health Organization (Howard et al.)","measures":"Service levels; about 20 L per person per day is the basic-access threshold","resolution":"Guidance","period":"2020","access":"Open","status":"inhand","role":"Basic-need line in the cost rule (households buy replacement water to stay above it)","cannot":"Mongolia-specific behaviour","url":"https://www.who.int/publications/i/item/9789240015241"},{"id":"D13","name":"Ulaanbaatar district boundaries (geoBoundaries MNG ADM2)","provider":"geoBoundaries, from the National Statistics Office of Mongolia and OCHA ROAP","measures":"District (düüreg) outlines","resolution":"Simplified for screen display","period":"Boundaries as of 2021","access":"Open, CC BY 3.0 IGO","status":"inhand","role":"The map","cannot":"Khoroo boundaries; service-area boundaries of the water network","url":"https://www.geoboundaries.org"},{"id":"D14","name":"World Bank (2026) feature on Mongolia's water recycling","provider":"World Bank","measures":"States that nearly all of Ulaanbaatar's water use relies on groundwater","resolution":"City","period":"2026","access":"Open","status":"inhand","role":"Supports treating supply dependence on groundwater as near-total","cannot":"Shares by district or by wellfield","url":"https://www.worldbank.org/en/news/feature/2026/03/19/from-scarcity-to-innovation-mongolia-s-first-water-recycling-system-powers-livelihoods"},{"id":"D15","name":"Which districts draw on the central Tuul wellfields","provider":"Water utility (USUG) service-area information","measures":"Share of each district's supply from the central wellfields vs local sources (Nalaikh, Baganuur and Bagakhangai lie outside the core)","resolution":"District","period":"Current","access":"Request","status":"request","role":"Exposure: how much of each district a central-wellfield shortfall reaches","cannot":"Hydraulic detail of the network","url":""}];
+(function(){'use strict';
+const $=id=>document.getElementById(id),root=document.documentElement;
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const num=v=>v===''||v==null||!isFinite(+v)?null:+v;
+const fmt=(v,d=0)=>v==null?'—':v.toLocaleString('en-US',{maximumFractionDigits:d,minimumFractionDigits:d});
+
+/* theme (shared with the main site) */
+$('themeBtn').addEventListener('click',()=>{root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';store.set('twb-theme',root.dataset.theme);paintMap()});
+
+/* state: assumptions + district data, saved in this browser only */
+const DEF={shortfall:25,basic:20,use:{piped:190,kiosk:17,other:null},price:{piped:null,kiosk:null,rep:null},useProb:false,prob:10,metric:'cost'};
+let S=JSON.parse(JSON.stringify(DEF));let D={};
+try{const s=JSON.parse(store.get('twb-risk-v1')||'null');if(s){S=Object.assign(S,s.S||{});S.use=Object.assign({},DEF.use,(s.S||{}).use);S.price=Object.assign({},DEF.price,(s.S||{}).price);D=s.D||{}}}catch(e){}
+const save=()=>store.set('twb-risk-v1',JSON.stringify({S,D}));
+GEOM.forEach(g=>{D[g.id]=Object.assign({pop:null,piped:null,kiosk:null,other:null,central:null,src:''},D[g.id]||{})});
+const ORDER=['SKhD','BZD','KUD','BGD','CHD','SBD','NLD','BND','BKhD'];
+GEOM.sort((a,b)=>ORDER.indexOf(a.id)-ORDER.indexOf(b.id));
+
+/* model */
+function valid(d){if(d.pop==null||d.piped==null||d.kiosk==null||d.other==null)return false;return Math.abs(d.piped+d.kiosk+d.other-100)<=1&&d.pop>0}
+function compute(){
+  const s=S.shortfall/100,B=S.basic,P=S.price,priced=P.piped!=null&&P.kiosk!=null&&P.rep!=null,prob=S.useProb?S.prob/100:1;
+  const groups=[['piped',S.use.piped,P.piped],['kiosk',S.use.kiosk,P.kiosk],['other',S.use.other,P.kiosk]];
+  const rows=GEOM.map(g=>{const d=D[g.id],ok=valid(d);
+    const r={g,d,ok,assumedCentral:d.central==null};
+    if(!ok)return r;
+    const cut=s*((d.central==null?100:d.central)/100);
+    let rep=0,unmet=0,cost=0,people=0,byG={};
+    for(const [k,use,price] of groups){const n=d.pop*d[k]/100;if(!n)continue;
+      if(use==null){byG[k]={n,rep:null,unmet:null,cost:null};continue}
+      const lost=cut*use,need=Math.max(0,B-use*(1-cut)),rp=Math.min(lost,need),um=lost-rp;
+      const c=priced?365*rp/1000*Math.max(0,P.rep-(price??0))*prob:null;
+      byG[k]={n,rep:rp,unmet:um,cost:c};rep+=n*rp;unmet+=n*um;if(c!=null)cost+=n*c;people+=n}
+    r.byG=byG;r.missingUse=groups.some(([k,use])=>use==null&&d[k]>0);
+    r.rep=people?rep/people:null;r.unmet=people?unmet/people:null;r.costTotal=priced?cost:null;r.costPP=priced&&people?cost/people:null;
+    r.exposed=d.pop*((d.central==null?100:d.central)/100);r.vuln=(d.kiosk+d.other)/100;return r});
+  const ok=rows.filter(r=>r.ok);
+  const tier=(key)=>{const v=ok.map(r=>r[key]).sort((a,b)=>a-b);ok.forEach(r=>{if(v.length<3){r['t_'+key]=null;return}const i=v.indexOf(r[key]);r['t_'+key]=i<v.length/3?'L':i<2*v.length/3?'M':'H'})};
+  tier('exposed');tier('vuln');
+  return {rows,ok,priced};
+}
+
+/* map */
+const svg=$('map'),NS='http://www.w3.org/2000/svg';
+const MAIN=GEOM.filter(g=>!['BND','BKhD'].includes(g.id)),INS=GEOM.filter(g=>['BND','BKhD'].includes(g.id));
+function bbox(list){let a=[1e9,1e9,-1e9,-1e9];list.forEach(g=>g.rings.forEach(r=>r.forEach(([x,y])=>{a=[Math.min(a[0],x),Math.min(a[1],y),Math.max(a[2],x),Math.max(a[3],y)]})));return a}
+function centroid(g){let A=0,cx=0,cy=0;const r=g.rings.reduce((m,x)=>x.length>m.length?x:m);for(let i=0;i<r.length;i++){const [x0,y0]=r[i],[x1,y1]=r[(i+1)%r.length],f=x0*y1-x1*y0;A+=f;cx+=(x0+x1)*f;cy+=(y0+y1)*f}return [cx/(3*A),cy/(3*A)]}
+const W=640,PAD=14,TOP=30;
+const mb=bbox(MAIN),scale=(W*0.76-2*PAD)/(mb[2]-mb[0]),H=Math.max(TOP+(mb[3]-mb[1])*scale+34,392);
+const tx=([x,y])=>[PAD+(x-mb[0])*scale,TOP+(y-mb[1])*scale];
+svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+const paths={};
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);(p||svg).appendChild(e);return e}
+const defs=el('defs',{});const pat=el('pattern',{id:'nd',width:'6',height:'6',patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'},defs);
+el('rect',{width:'6',height:'6',style:'fill:var(--nodata)'},pat);el('line',{x1:'0',y1:'0',x2:'0',y2:'6',style:'stroke:var(--line-2);stroke-width:1.2'},pat);
+function drawGroup(list,T){list.forEach(g=>{const d=g.rings.map(r=>'M'+r.map(p=>T(p).map(v=>v.toFixed(1)).join(',')).join('L')+'Z').join('');
+  const p=el('path',{d,class:'d',tabindex:'0',role:'button','aria-label':g.en});p.dataset.id=g.id;paths[g.id]=p;
+  const [cx,cy]=T(centroid(g));const t=el('text',{x:cx.toFixed(1),y:cy.toFixed(1),'text-anchor':'middle',class:'lbl'});t.textContent=g.en;g._lbl=t})}
+drawGroup(MAIN,tx);
+// labels for narrow central districts: nudge so they don't collide
+// the two narrow northern strips are labelled just above their northern tips
+const topOf=g=>{let t=null;g.rings.forEach(r=>r.forEach(p=>{if(!t||p[1]<t[1])t=p}));return tx(t)};
+[['CHD','end',-3],['SBD','start',3]].forEach(([id,anchor,dx])=>{const g=MAIN.find(m=>m.id===id),[x,y]=topOf(g);g._lbl.setAttribute('x',(x+dx).toFixed(1));g._lbl.setAttribute('y',(y-6).toFixed(1));g._lbl.setAttribute('text-anchor',anchor)});
+{const g=MAIN.find(m=>m.id==='BGD');g._lbl.setAttribute('y',+g._lbl.getAttribute('y')+12)}
+// insets for the two exclaves, with their real distance from the city centre
+const K=Math.cos(47.9*Math.PI/180),center=[106.917*K,-47.918];
+INS.forEach((g,i)=>{const b=bbox([g]),bw=W*0.2,bh=(H-TOP-40)/2-14,x0=W-bw-10,y0=TOP+i*(bh+30);
+  el('rect',{x:x0,y:y0,width:bw,height:bh,rx:'8',class:'inset'});
+  const sc=Math.min((bw-20)/(b[2]-b[0]),(bh-38)/(b[3]-b[1]));const T=([x,y])=>[x0+10+(x-b[0])*sc+((bw-20)-(b[2]-b[0])*sc)/2,y0+10+(y-b[1])*sc];
+  drawGroup([g],T);g._lbl.setAttribute('y',y0+bh-10);
+  const [cx,cy]=centroid(g),km=Math.round(Math.hypot((cx-center[0])/K*111.32*K,(cy-center[1])*111.32)/10)*10;
+  const dx=cx-center[0],dy=cy-center[1],dir=(Math.abs(dy)>.4*Math.abs(dx)?(dy>0?'S':'N'):'')+(Math.abs(dx)>.4*Math.abs(dy)?(dx>0?'E':'W'):'');
+  const n=el('text',{x:x0+4,y:y0-6,class:'note'});n.textContent=`Inset · ≈${km} km ${dir}`});
+el('text',{x:PAD,y:H-8,class:'note'}).textContent='Central districts to scale. Simplified outlines (geoBoundaries).';
+// keep map text readable on small screens: label size follows the rendered width
+function sizeLabels(){const k=Math.min(1.5,Math.max(1,W/(svg.clientWidth||W)));svg.querySelectorAll('.lbl').forEach(t=>t.style.fontSize=(11*k).toFixed(1)+'px');svg.querySelectorAll('.note').forEach(t=>t.style.fontSize=(10*Math.min(k,1.5)).toFixed(1)+'px')}
+sizeLabels();if('ResizeObserver' in window)new ResizeObserver(sizeLabels).observe(svg);else addEventListener('resize',sizeLabels);
+/* tooltip + selection */
+const tip=document.createElement('div');tip.className='tip';tip.hidden=true;$('mapcard').style.position='relative';$('mapcard').appendChild(tip);
+let sel=null,last=null;
+function tipFor(id,evt){const r=last.rows.find(r=>r.g.id===id);const g=r.g;
+  tip.innerHTML='';const b=document.createElement('b');b.textContent=`${g.en} · ${g.mn}`;tip.append(b);
+  const add=t=>{const s=document.createElement('div');s.textContent=t;tip.append(s)};
+  if(!r.ok){add('No district data yet');}else{add(`People: ${fmt(r.d.pop)}`);add(`Not piped: ${fmt(r.vuln*100)}%`);add(`Bought back: ${fmt(r.rep,1)} L/person/day`);add(r.costPP!=null?`Extra cost: ${fmt(r.costPP)} MNT/person/yr`:'Cost: enter prices');if(r.assumedCentral)add('Wellfield share assumed 100%')}
+  const box=$('mapcard').getBoundingClientRect();let x=evt.clientX-box.left+14,y=evt.clientY-box.top+14;
+  tip.hidden=false;x=Math.min(x,box.width-tip.offsetWidth-8);tip.style.left=x+'px';tip.style.top=y+'px'}
+Object.values(paths).forEach(p=>{
+  p.addEventListener('pointermove',e=>tipFor(p.dataset.id,e));p.addEventListener('pointerleave',()=>tip.hidden=true);
+  p.addEventListener('click',()=>select(p.dataset.id));p.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(p.dataset.id)}});
+  p.addEventListener('focus',()=>{const r=p.getBoundingClientRect();tipFor(p.dataset.id,{clientX:r.left+r.width/2,clientY:r.top+r.height/2})});p.addEventListener('blur',()=>tip.hidden=true)});
+function select(id){sel=sel===id?null:id;Object.values(paths).forEach(p=>p.classList.toggle('sel',p.dataset.id===sel));document.querySelectorAll('#resTable tbody tr').forEach(tr=>tr.classList.toggle('sel',tr.dataset.id===sel))}
+
+const METRICS={cost:{lab:'Extra cost per person per year (MNT)',get:r=>r.costPP,note:'Needs prices'},litres:{lab:'Litres bought back per person per day',get:r=>r.rep},vuln:{lab:'Share of people not on piped supply',get:r=>r.vuln,pct:true},exposed:{lab:'People reached by a central-wellfield shortfall',get:r=>r.exposed}};
+function paintMap(){if(!last)return;const m=METRICS[S.metric],cs=getComputedStyle(root),Q=[0,1,2,3,4].map(i=>cs.getPropertyValue('--q'+i).trim());
+  const vals=last.rows.map(r=>r.ok?m.get(r):null).filter(v=>v!=null);const lo=Math.min(...vals),hi=Math.max(...vals);
+  last.rows.forEach(r=>{const v=r.ok?m.get(r):null,p=paths[r.g.id];
+    if(v==null){p.style.fill='url(#nd)';return}const k=hi>lo?Math.min(4,Math.floor((v-lo)/(hi-lo)*5)):2;p.style.fill=Q[k]});
+  $('ramp').innerHTML=Q.map(c=>`<i style="background:${c}"></i>`).join('');
+  $('rampLo').textContent=vals.length?(m.pct?fmt(lo*100)+'%':fmt(lo,m===METRICS.litres?1:0)):'low';$('rampHi').textContent=vals.length?(m.pct?fmt(hi*100)+'%':fmt(hi,m===METRICS.litres?1:0)):'high';
+  $('metricNote').textContent=m.lab+(S.metric==='cost'&&!last.priced?' · enter prices to see this':'');
+  $('mapDesc').textContent=m.lab+'. '+last.rows.map(r=>`${r.g.en}: ${r.ok&&m.get(r)!=null?(m.pct?fmt(m.get(r)*100)+'%':fmt(m.get(r),1)):'no data'}`).join('; ');
+  document.querySelectorAll('[data-metric]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.metric===S.metric)))}
+
+/* results */
+function bar(node,parts){node.innerHTML='';parts.forEach(([cls,v])=>{if(v<=0)return;const s=document.createElement('span');s.className=cls;s.style.width=(v*100).toFixed(2)+'%';s.title=`${Math.round(v*100)}%`;node.append(s)})}
+function render(){
+  last=compute();const {rows,ok,priced}=last;
+  // status strip
+  $('stDistricts').textContent=`${ok.length} of 9`;
+  const np=['piped','kiosk','rep'].filter(k=>S.price[k]!=null).length;$('stPrices').textContent=`${np} of 3`;
+  $('stProb').textContent=S.useProb?`${S.prob}% a year (assumption)`:'Not set';
+  // headline
+  let head;
+  if(!ok.length)head='No district data yet. Enter population and supply shares below, or paste a CSV, and this sentence will answer the question.';
+  else{const tot={piped:[0,0],kiosk:[0,0],other:[0,0]};let pop=0,cost=0;
+    ok.forEach(r=>{for(const k in r.byG){const g=r.byG[k];tot[k][0]+=g.n;tot[k][1]+=(priced?(g.cost||0):(g.rep||0))*g.n;pop+=g.n;cost+=(priced?(g.cost||0):(g.rep||0))*g.n}});
+    const shP=k=>tot[k][0]/pop,shC=k=>cost?tot[k][1]/cost:0,nonP=shP('kiosk')+shP('other'),nonC=shC('kiosk')+shC('other');
+    $('shareBlock').hidden=false;bar($('barPeople'),[['c-piped',shP('piped')],['c-kiosk',shP('kiosk')],['c-other',shP('other')]]);
+    bar($('barCost'),[['c-piped',shC('piped')],['c-kiosk',shC('kiosk')],['c-other',shC('other')]]);
+    $('barCostLab').textContent=priced?'Share of cost':'Share of litres bought back';
+    const what=priced?'of the extra cost':'of the water that must be bought back';
+    head=cost>0?`In this ${S.shortfall}% shortfall scenario, people without piped supply are ${Math.round(nonP*100)}% of residents in the districts entered, but carry ${Math.round(nonC*100)}% ${what}.`
+      :`At a ${S.shortfall}% shortfall, nobody in the entered districts falls below the ${S.basic} L line, so no water has to be bought back.`;
+    if(priced)head+=` Total: ${fmt(cost)} MNT a year${S.useProb?' (expected, using your probability)':' if the shortfall happens'}.`;
+    if(ok.length<9)head+=` (${ok.length} of 9 districts entered.)`}
+  $('headline').textContent=head;if(!ok.length)$('shareBlock').hidden=true;
+  // table
+  $('costHead').textContent=S.useProb?'Expected cost / yr':'Extra cost / yr';
+  const tb=$('resTable').tBodies[0];tb.innerHTML='';
+  rows.forEach(r=>{const tr=document.createElement('tr');tr.dataset.id=r.g.id;if(r.g.id===sel)tr.className='sel';
+    const td=(t,cls)=>{const c=document.createElement('td');if(cls)c.className=cls;c.textContent=t;tr.append(c);return c};
+    const name=td('');name.innerHTML=`<b></b><br><span class="muted"></span>`;name.querySelector('b').textContent=r.g.en;name.querySelector('span').textContent=r.g.mn+(r.ok&&r.assumedCentral?' · wellfield share assumed':'')+(r.ok&&r.missingUse?' · “other” use not set':'');
+    if(!r.ok){td('—','n');td('—','n');td('—');td('—');td('—');td('—','n');td('—','n');td(D[r.g.id].pop!=null?'check shares':'no data','n muted');tb.append(tr);return}
+    td(fmt(r.d.pop),'n');td(fmt(r.vuln*100)+'%','n');
+    const t=v=>{const c=td('');if(v){const s=document.createElement('span');s.className='tier '+v;s.textContent=v;c.append(s)}else c.textContent='—'};
+    t(r.t_exposed);td('City-wide','muted');t(r.t_vuln);
+    td(fmt(r.rep,1),'n');td(fmt(r.unmet,1),'n');td(r.costTotal!=null?fmt(r.costTotal)+' MNT':'needs prices','n'+(r.costTotal==null?' muted':''));
+    tr.addEventListener('click',()=>select(r.g.id));tb.append(tr)});
+  paintMap();save();
+}
+
+/* controls */
+const bindRange=(id,key,out,suffix)=>{const i=$(id);i.value=S[key];const show=()=>{$(out).textContent=S[key]+suffix};show();
+  i.addEventListener('input',()=>{S[key]=+i.value;show();syncChips();render()})};
+bindRange('shortfall','shortfall','shortfallOut','%');bindRange('basic','basic','basicOut',' L');bindRange('prob','prob','probOut','%');
+function syncChips(){document.querySelectorAll('[data-sc]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.sc===S.shortfall)))}
+document.querySelectorAll('[data-sc]').forEach(b=>b.addEventListener('click',()=>{S.shortfall=+b.dataset.sc;$('shortfall').value=S.shortfall;$('shortfallOut').textContent=S.shortfall+'%';syncChips();render()}));syncChips();
+for(const [id,obj,key] of [['usePiped','use','piped'],['useKiosk','use','kiosk'],['useOther','use','other'],['pPiped','price','piped'],['pKiosk','price','kiosk'],['pRep','price','rep']]){
+  const i=$(id);i.value=S[obj][key]??'';i.addEventListener('input',()=>{const v=num(i.value);S[obj][key]=v!=null&&v>=0?v:null;render()})}
+$('useProb').checked=S.useProb;$('probField').hidden=!S.useProb;
+$('useProb').addEventListener('change',e=>{S.useProb=e.target.checked;$('probField').hidden=!S.useProb;render()});
+document.querySelectorAll('[data-metric]').forEach(b=>b.addEventListener('click',()=>{S.metric=b.dataset.metric;paintMap();save()}));
+
+/* district data grid */
+$('idList').textContent=GEOM.map(g=>`${g.id} (${g.en})`).join(', ');
+const COLS=[['pop','Population',0,1e7],['piped','% piped',0,100],['kiosk','% kiosk',0,100],['other','% other',0,100],['central','% central wellfields',0,100]];
+function buildGrid(){const tb=$('dataGrid').tBodies[0];tb.innerHTML='';
+  GEOM.forEach(g=>{const tr=document.createElement('tr');const th=document.createElement('td');th.innerHTML='<b></b><br><span class="muted"></span>';th.querySelector('b').textContent=g.en;th.querySelector('span').textContent=g.mn;tr.append(th);
+    COLS.forEach(([k,lab,mn,mx])=>{const td=document.createElement('td');const i=document.createElement('input');i.type='number';i.min=mn;i.max=mx;i.step='any';i.inputMode='decimal';i.value=D[g.id][k]??'';i.setAttribute('aria-label',`${g.en} ${lab}`);
+      i.addEventListener('input',()=>{const v=num(i.value);D[g.id][k]=v!=null&&v>=mn&&v<=mx?v:null;mark(tr,g.id);render()});td.append(i);tr.append(td)});
+    const td=document.createElement('td');const i=document.createElement('input');i.type='text';i.value=D[g.id].src||'';i.placeholder='e.g. NSO 2020 census';i.setAttribute('aria-label',`${g.en} source`);
+    i.addEventListener('input',()=>{D[g.id].src=i.value.slice(0,120);save()});td.append(i);tr.append(td);tb.append(tr);mark(tr,g.id)})}
+function mark(tr,id){const d=D[id],ins=tr.querySelectorAll('input[type=number]');const any=d.piped!=null||d.kiosk!=null||d.other!=null;
+  const bad=any&&(d.piped==null||d.kiosk==null||d.other==null||Math.abs(d.piped+d.kiosk+d.other-100)>1);[1,2,3].forEach(i=>ins[i].classList.toggle('bad',bad))}
+buildGrid();
+function csvOf(){const rows=[['district_id','name_en','population','share_piped_pct','share_kiosk_pct','share_other_pct','share_central_wellfields_pct','source']];
+  GEOM.forEach(g=>{const d=D[g.id];rows.push([g.id,g.en,d.pop??'',d.piped??'',d.kiosk??'',d.other??'',d.central??'',d.src||''])});
+  return rows.map(r=>r.map(v=>/[",\n]/.test(String(v))?`"${String(v).replace(/"/g,'""')}"`:v).join(',')).join('\n')}
+function download(text,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv'}));a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+$('exportBtn').addEventListener('click',()=>download(csvOf(),'ulaanbaatar_districts.csv'));
+let clearArmed=false;
+$('clearBtn').addEventListener('click',()=>{if(!clearArmed){clearArmed=true;$('clearBtn').textContent='Press again to clear';$('clearMsg').textContent='This removes every district value saved in this browser.';$('clearMsg').className='msg bad';setTimeout(()=>{clearArmed=false;$('clearBtn').textContent='Clear all district data';$('clearMsg').textContent=''},5000);return}
+  clearArmed=false;GEOM.forEach(g=>D[g.id]={pop:null,piped:null,kiosk:null,other:null,central:null,src:''});buildGrid();render();$('clearBtn').textContent='Clear all district data';$('clearMsg').textContent='Cleared.';$('clearMsg').className='msg ok'});
+function parseCSV(t){const out=[];let row=[],f='',q=false;for(let i=0;i<t.length;i++){const c=t[i];
+  if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}else if(c==='"')q=true;else if(c===','){row.push(f);f=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&t[i+1]==='\n')i++;row.push(f);out.push(row);row=[];f=''}else f+=c}
+  if(f!==''||row.length){row.push(f);out.push(row)}return out.filter(r=>r.some(x=>x.trim()!==''))}
+$('importBtn').addEventListener('click',()=>{const rows=parseCSV($('csvIn').value);const msg=$('importMsg');
+  if(!rows.length){msg.textContent='Nothing to import.';msg.className='msg bad';return}
+  const head=rows[0].map(h=>h.trim().toLowerCase());const col=n=>head.indexOf(n);
+  if(col('district_id')<0){msg.textContent='The first row must be a header that includes district_id.';msg.className='msg bad';return}
+  const map={population:'pop',share_piped_pct:'piped',share_kiosk_pct:'kiosk',share_other_pct:'other',share_central_wellfields_pct:'central'};
+  let n=0;const errs=[];
+  rows.slice(1).forEach((r,i)=>{const id=(r[col('district_id')]||'').trim();if(!D[id]){errs.push(`row ${i+2}: unknown district “${id}”`);return}
+    for(const h in map){const j=col(h);if(j<0)continue;const v=num((r[j]||'').trim().replace(/\s/g,''));D[id][map[h]]=v}
+    if(col('source')>=0)D[id].src=(r[col('source')]||'').slice(0,120);n++;
+    if(!valid(D[id])&&D[id].pop!=null)errs.push(`${id}: shares don’t add up to 100`)});
+  buildGrid();render();msg.textContent=`Imported ${n} district${n===1?'':'s'}.`+(errs.length?' Check: '+errs.slice(0,4).join('; '):'');msg.className='msg '+(errs.length?'bad':'ok')});
+
+/* catalog */
+const ST={inhand:['In hand','ok'],download:['To download','todo'],request:['To request','todo'],restricted:['Restricted','no']};
+function renderCat(f){const c=$('cat');c.innerHTML='';
+  CATALOG.filter(d=>f==='all'||d.status===f).forEach(d=>{const a=document.createElement('article');a.className='ds';a.id='ds-'+d.id;
+    a.innerHTML='<div class="id"></div><div><h3><span class="t"></span><span class="tag"></span></h3><dl></dl></div>';
+    a.querySelector('.id').textContent=d.id;a.querySelector('.t').textContent=d.name;const tg=a.querySelector('.tag');tg.textContent=ST[d.status][0];tg.classList.add(ST[d.status][1]);
+    const dl=a.querySelector('dl');
+    for(const [k,lab] of [['provider','Provider'],['measures','Measures'],['resolution','Resolution'],['period','Period'],['access','Access'],['role','Role here'],['cannot','Cannot support']]){
+      const dt=document.createElement('dt');dt.textContent=lab;const dd=document.createElement('dd');dd.textContent=d[k];if(k==='cannot')dd.className='cannot';dl.append(dt,dd)}
+    if(d.url){const dt=document.createElement('dt');dt.textContent='Link';const dd=document.createElement('dd');const l=document.createElement('a');l.href=d.url;l.target='_blank';l.rel='noopener noreferrer';l.textContent=d.url.replace(/^https?:\/\/(www\.)?/,'').split('/')[0]+' ↗';l.title=d.url;dd.append(l);dl.append(dt,dd)}
+    c.append(a)})}
+let catF='all';
+document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{catF=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderCat(catF)}));
+renderCat('all');
+// citation links always reach their card, even when a filter hides it
+document.addEventListener('click',e=>{const a=e.target.closest('a.cite');if(!a)return;const id=a.getAttribute('href').slice(1);if(!$(id)){catF='all';document.querySelectorAll('[data-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.filter==='all')));renderCat('all')}});
+$('catCsv').addEventListener('click',()=>{const keys=['id','name','provider','measures','resolution','period','access','status','role','cannot','url'];
+  download([keys.join(',')].concat(CATALOG.map(d=>keys.map(k=>`"${String(d[k]).replace(/"/g,'""')}"`).join(','))).join('\n'),'data_catalog.csv')});
+
+render();
+})();
+</script>
+</body>
+</html>
